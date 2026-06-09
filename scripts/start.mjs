@@ -67,6 +67,7 @@ function writeConfig() {
   mkdirSync(HOME, { recursive: true });
   mkdirSync(join(HOME, "logs"), { recursive: true });
   mkdirSync(join(HOME, "storage"), { recursive: true });
+  mkdirSync(join(HOME, "backups"), { recursive: true });
 
   const config = {
     $meta: {
@@ -80,6 +81,9 @@ function writeConfig() {
       // defaulting to embedded. Use the external Railway Postgres when DATABASE_URL is set.
       mode: process.env.DATABASE_URL ? "postgres" : "embedded-postgres",
       connectionString: process.env.DATABASE_URL || undefined,
+      // Keep DB backups on the persistent volume; the schema default points at
+      // ~/.paperclip/... which is ephemeral container disk on Railway.
+      backup: { dir: join(HOME, "backups") },
     },
     logging: {
       mode: "file",
