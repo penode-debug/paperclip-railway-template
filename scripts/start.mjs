@@ -67,6 +67,7 @@ function writeConfig() {
   mkdirSync(HOME, { recursive: true });
   mkdirSync(join(HOME, "logs"), { recursive: true });
   mkdirSync(join(HOME, "storage"), { recursive: true });
+  mkdirSync(join(HOME, "backups"), { recursive: true });
 
   const config = {
     $meta: {
@@ -76,8 +77,13 @@ function writeConfig() {
       source: "onboard",
     },
     database: {
-      provider: "postgres",
-      connectionString: process.env.DATABASE_URL,
+      // Paperclip's schema keys this on `mode` ("postgres" | "embedded-postgres"),
+      // defaulting to embedded. Use the external Railway Postgres when DATABASE_URL is set.
+      mode: process.env.DATABASE_URL ? "postgres" : "embedded-postgres",
+      connectionString: process.env.DATABASE_URL || undefined,
+      // Keep DB backups on the persistent volume; the schema default points at
+      // ~/.paperclip/... which is ephemeral container disk on Railway.
+      backup: { dir: join(HOME, "backups") },
     },
     logging: {
       mode: "file",
@@ -85,7 +91,7 @@ function writeConfig() {
     },
     server: {
       deploymentMode: process.env.PAPERCLIP_DEPLOYMENT_MODE || "authenticated",
-      deploymentExposure: process.env.PAPERCLIP_DEPLOYMENT_EXPOSURE || "public",
+      exposure: process.env.PAPERCLIP_DEPLOYMENT_EXPOSURE || "public",
       allowedHostnames: (process.env.PAPERCLIP_ALLOWED_HOSTNAMES || "")
         .split(",").map(h => h.trim()).filter(Boolean),
       port: PAPERCLIP_PORT,
@@ -98,7 +104,7 @@ function writeConfig() {
     },
     storage: {
       provider: "local_disk",
-      localDiskPath: join(HOME, "storage"),
+      localDisk: { baseDir: join(HOME, "storage") },
     },
     secrets: {
       provider: "local_encrypted",
