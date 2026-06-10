@@ -21,6 +21,31 @@ COPY . .
 # Give ownership of everything to the non-root user
 RUN chown -R paperclip:paperclip /app /home/paperclip
 
+# Install OpenCode CLI globally
+RUN npm install --global opencode-ai
+
+# Create OpenCode config directory for paperclip user and write provider config
+RUN mkdir -p /home/paperclip/.config/opencode \
+ && cat > /home/paperclip/.config/opencode/config.json <<'OPENCODE_CONFIG'
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "ollama": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Ollama (Railway internal)",
+      "options": {
+        "baseURL": "http://ollama.railway.internal:11434/v1"
+      },
+      "models": {
+        "qwen2.5-coder:14b": {"name": "Qwen2.5 Coder 14B"},
+        "qwen3:8b": {"name": "Qwen3 8B"}
+      }
+    }
+  }
+}
+OPENCODE_CONFIG
+    && chown -R paperclip:paperclip /home/paperclip/.config
+
 # Copy and set up entrypoint (fixes volume mount ownership at runtime)
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
