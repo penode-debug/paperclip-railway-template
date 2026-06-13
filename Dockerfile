@@ -26,7 +26,7 @@ RUN npm install --global opencode-ai
 
 # Create OpenCode config directory for paperclip user and write provider config
 RUN mkdir -p /home/paperclip/.config/opencode
-RUN printf '{\n  "$schema": "https://opencode.ai/config.json",\n  "provider": {\n    "ollama": {\n      "npm": "@ai-sdk/openai-compatible",\n      "name": "Ollama (Railway internal)",\n      "options": {\n        "baseURL": "http://ollama.railway.internal:11434/v1"\n      },\n      "models": {\n        "qwen2.5-coder:14b": {"name": "Qwen2.5 Coder 14B"},\n        "qwen3:8b": {"name": "Qwen3 8B"}\n      }\n    }\n  }\n}\n' > /home/paperclip/.config/opencode/config.json
+RUN printf '{\n  "$schema": "https://opencode.ai/config.json",\n  "provider": {\n    "ollama": {\n      "npm": "@ai-sdk/openai-compatible",\n      "name": "Ollama (Railway internal)",\n      "options": {\n        "baseURL": "http://ollama.railway.internal:11434/v1"\n      },\n      "models": {\n        "qwen2.5-coder:14b": {"name": "Qwen2.5 Coder 14B"},\n      "qwen2.5:3b": {"name": "Qwen2.5 3B"},\n      "qwen3:8b": {"name": "Qwen3 8B"}\n      }\n    }\n  }\n}\n' > /home/paperclip/.config/opencode/config.json
 RUN chown -R paperclip:paperclip /home/paperclip/.config
 
 # Copy and set up entrypoint (fixes volume mount ownership at runtime)
